@@ -1,16 +1,13 @@
 import math;
-import json;
 
 def estimator(data):
 
-  data = json.loads(data)
   reportedCases = data['reportedCases']
   periodType = data['periodType']
   timeToElapse = data['timeToElapse']
-  availableHospitalBeds = math.trunc(0.35 * data['totalHospitalBeds'])
+  availableHospitalBeds = 0.35 * data['totalHospitalBeds']
   avgDailyIncomePopulation = data['region']['avgDailyIncomePopulation']
   avgDailyIncomeInUSD = data['region']['avgDailyIncomeInUSD']
-  totalDailyIncomeInUSD = avgDailyIncomeInUSD * avgDailyIncomePopulation
   impactCurrentlyInfected, severeImpactCurrentlyInfected = CalculateCurrentlyInfected(reportedCases)  
   timeToElapse = getDays(periodType, timeToElapse)
   impactInfections, severeImpactInfections = getInfectionsByRequestedTime(impactCurrentlyInfected, severeImpactCurrentlyInfected, timeToElapse)
@@ -18,19 +15,19 @@ def estimator(data):
   impactHospitalBeds,severeImpactHospitalBeds = getHospitalBedsByRequestedTime(impactSevereCases, severeImpactSevereCases,availableHospitalBeds)
   impactCasesForICU,severeImpactCasesForICU = getCasesForICUByRequestedTime(impactInfections, severeImpactInfections)
   impactCasesForVentilators,severeImpactCasesForVentilators = getCasesForVentilatorsByRequestedTime(impactInfections, severeImpactInfections)
-  impactDollarInFlight, severeImpactDollarInFlight = getDollarInflight(impactInfections, severeImpactInfections,totalDailyIncomeInUSD, timeToElapse)
+  impactDollarInFlight, severeImpactDollarInFlight = getDollarInflight(impactInfections, severeImpactInfections,avgDailyIncomeInUSD, avgDailyIncomePopulation, timeToElapse)
   impactData = getData(impactCurrentlyInfected, impactInfections, impactSevereCases, impactHospitalBeds, impactCasesForICU, impactCasesForVentilators, impactDollarInFlight,severeImpactCurrentlyInfected, severeImpactInfections, severeImpactSevereCases, severeImpactHospitalBeds, severeImpactCasesForICU, severeImpactCasesForVentilators, severeImpactDollarInFlight, False)
   severeImpactData = getData(impactCurrentlyInfected, impactInfections, impactSevereCases, impactHospitalBeds, impactCasesForICU, impactCasesForVentilators, impactDollarInFlight,severeImpactCurrentlyInfected, severeImpactInfections, severeImpactSevereCases, severeImpactHospitalBeds, severeImpactCasesForICU, severeImpactCasesForVentilators, severeImpactDollarInFlight, True)
 
-  return json.dumps({
+  return {
     "data" : data,
     "impact" : impactData,
     "severeImpact" : severeImpactData
-  },indent = 2)
+  }
 
 def CalculateCurrentlyInfected(reportedCases):
-  impact = reportedCases * 10;
-  severeImpact = reportedCases * 50;
+  impact = math.trunc(reportedCases * 10);
+  severeImpact = math.trunc(reportedCases * 50);
   return impact, severeImpact
 
 def getDays(periodType, timeToElapse) : 
@@ -53,8 +50,8 @@ def getSevereCasesByRequestedTime(impactRequestedTime, severeImpactRequestedTime
   return impactSevereCases, severeImpactSevereCases
 
 def getHospitalBedsByRequestedTime(impactSevereCases, severeImpactSevereCases, availableHospitalBeds):
-  impactHospitalBeds = availableHospitalBeds - impactSevereCases
-  severeImpactHospitalBeds = availableHospitalBeds - severeImpactSevereCases
+  impactHospitalBeds = math.trunc(availableHospitalBeds - impactSevereCases)
+  severeImpactHospitalBeds = math.trunc(availableHospitalBeds - severeImpactSevereCases)
   return impactHospitalBeds,severeImpactHospitalBeds
 
 
@@ -68,10 +65,10 @@ def getCasesForVentilatorsByRequestedTime(impactInfections, severeImpactInfectio
   severeImpactCasesForVentilators = math.trunc(0.02 * severeImpactInfections)
   return impactCasesForVentilators,severeImpactCasesForVentilators
 
-def getDollarInflight(impactInfections, severeImpactInfections, totalDailyIncomeInUSD, timeToElapse):
-  impactDollarinFlight = round(impactInfections * totalDailyIncomeInUSD * timeToElapse, 2)
-  severeImpactDollarinFlight = round(severeImpactInfections * totalDailyIncomeInUSD * timeToElapse,2)
-  return impactDollarinFlight, severeImpactDollarinFlight
+def getDollarInflight(impactInfections, severeImpactInfections, avgDailyIncomeInUSD,avgDailyIncomePopulation, timeToElapse):
+  impactDollarinFlight = (impactInfections * avgDailyIncomePopulation * avgDailyIncomeInUSD) / timeToElapse
+  severeImpactDollarinFlight = (severeImpactInfections * avgDailyIncomePopulation  * avgDailyIncomeInUSD) / timeToElapse
+  return math.trunc(impactDollarinFlight), math.trunc(severeImpactDollarinFlight)
 
 
 def getData(impactCurrentlyInfected, impactInfections, impactSevereCases, impactHospitalBeds, impactCasesForICU, impactCasesForVentilators, impactDollarInFlight,severeImpactCurrentlyInfected, severeImpactInfections, severeImpactSevereCases, severeImpactHospitalBeds, severeImpactCasesForICU, severeImpactCasesForVentilators, severeImpactDollarInFlight, isSevere):
