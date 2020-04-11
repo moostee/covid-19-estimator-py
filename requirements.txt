@@ -3,3 +3,4 @@ django==2.0
 djangorestframework==3.9.0
 djangorestframework-xml==1.4.0
 pytz==2019.3
+gunicorn==20.0.4

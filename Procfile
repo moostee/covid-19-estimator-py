@@ -1,0 +1,1 @@
+web: gunicorn covid19EstimatorAPI.wsgi --log-file -
