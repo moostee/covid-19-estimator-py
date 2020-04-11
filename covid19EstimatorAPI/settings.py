@@ -25,7 +25,9 @@ SECRET_KEY = 'ucxycy1k*39eis*+yx4p5ghbiduen&*m!6_$#2$5_xux9p(lb%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'covid-19-estimator-py.herokuapp.com'
+]
 
 
 # Application definition
