@@ -26,7 +26,8 @@ SECRET_KEY = 'ucxycy1k*39eis*+yx4p5ghbiduen&*m!6_$#2$5_xux9p(lb%'
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'covid-19-estimator-py.herokuapp.com'
+    'covid-19-estimator-py.herokuapp.com',
+    '127.0.0.1',
 ]
 
 

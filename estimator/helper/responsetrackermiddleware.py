@@ -12,6 +12,6 @@ class StatsMiddleware:
 
         duration = time.time() - start_time
         timeTaken = int(round(duration * 1000))
-        print(timeTaken)
+        timeTaken = "%02d" % (timeTaken,)
         writeToFile(request.method, request.path, response.status_code, timeTaken)
         return response
